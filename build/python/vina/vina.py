@@ -442,6 +442,15 @@ class Vina:
         energies = np.around(self._vina.optimize(max_steps), decimals=3)
         return energies
 
+    def set_callback(self, callback):
+        """Set a callback to evaluate the energy for the MC search
+
+        Args:
+            callback (callable): A callable that takes a numpy array of ligand coordinates as
+                                 input and returns an energy
+        """
+        self._vina.set_callback(callback)
+
     def dock(self, exhaustiveness=8, n_poses=20, min_rmsd=1.0, max_evals=0):
         """Docking: global search optimization.
 

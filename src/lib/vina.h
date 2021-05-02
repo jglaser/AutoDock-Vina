@@ -54,6 +54,7 @@
 #include "utils.h"
 #include "scoring_function.h"
 #include "precalculate.h"
+#include "callback.h"
 
 
 class Vina {
@@ -66,6 +67,7 @@ public:
 		m_map_initialized = false;
 		m_seed = generate_seed(seed);
 		m_no_refine = no_refine;
+        m_callback = 0;
 
 		// Look for the number of cpu
 		if (cpu <= 0) {
@@ -133,6 +135,7 @@ public:
 	void write_maps(const std::string& map_prefix="receptor", const std::string& gpf_filename="NULL",
 					const std::string& fld_filename="NULL", const std::string& receptor_filename="NULL");
 	void show_score(const std::vector<double> energies);
+    void set_callback(Callback &callback);
 
 private:
 	// model and poses
@@ -171,6 +174,8 @@ private:
 	std::vector<double> score(double intramolecular_energy);
 	std::vector<double> optimize(output_type& out, const int max_steps=0);
 	int generate_seed(const int seed=0);
+
+    Callback *m_callback;
 };
 
 #endif

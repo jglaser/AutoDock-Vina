@@ -24,13 +24,14 @@
 #define VINA_PARALLEL_MC_H
 
 #include "monte_carlo.h"
+#include "callback.h"
 
 struct parallel_mc {
 	monte_carlo mc;
 	sz num_tasks;
 	sz num_threads;
 	bool display_progress;
-	parallel_mc() : num_tasks(8), num_threads(1), display_progress(true) {}
+	parallel_mc(Callback *callback=0) : num_tasks(8), num_threads(1), display_progress(true) { mc.callback = callback; }
 	void operator()(const model& m, output_container& out, const precalculate_byatom& p, const igrid& ig, const vec& corner1, const vec& corner2, rng& generator) const;
 };
 

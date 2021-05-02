@@ -14,7 +14,7 @@
 #################################################################\n"
 %enddef
 
-%module(docstring=DOCSTRING, package="vina") vina_wrapper
+%module(docstring=DOCSTRING, package="vina", directors="1", threads="1") vina_wrapper
 
 %begin %{
 #define SWIG_PYTHON_2_UNICODE
@@ -102,4 +102,38 @@ namespace std {
 //import_array();
 //%}
 
+%{
+    #include "callback.h"
+%}
+
+%feature("director") Callback;
+%feature("nodirector") Vina;
+
+%feature("shadow") Vina::set_callback(Callback&) %{
+    def set_callback(self, *args):
+        import numpy as np
+
+        if len(args) == 1 and (not isinstance(args[0], Callback) and callable(args[0])):
+            class CallableWrapper(Callback):
+                def __init__(self, f):
+                    super(CallableWrapper, self).__init__()
+                    self.f_ = f
+                def call(self, obj):
+                    coordinates = np.array(obj)
+                    coordinates = coordinates.reshape((coordinates.shape[0] // 3, 3))
+                    try:
+                        res = self.f_(coordinates)
+                        return float(res)
+                    except:
+                        return 0.0
+
+            args = tuple([CallableWrapper(args[0])])
+            args[0].__disown__()
+        elif len(args) == 1 and isinstance(args[0], Callback):
+          args[0].__disown__()
+        $action(self, args[0])
+%}
+
+%include "Callback.h"
 %include "vina.i"
+

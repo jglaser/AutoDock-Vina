@@ -25,6 +25,7 @@
 
 #include "incrementable.h"
 #include "model.h"
+#include "callback.h"
 
 struct monte_carlo {
     unsigned max_evals;
@@ -35,6 +36,8 @@ struct monte_carlo {
 	sz num_saved_mins;
 	fl mutation_amplitude;
 	unsigned local_steps;
+    Callback *callback;
+
     // T = 600K, R = 2cal/(K*mol) -> temperature = RT = 1.2;  global_steps = 50*lig_atoms = 2500
     monte_carlo() : max_evals(0), global_steps(2500), temperature(1.2), hunt_cap(10, 1.5, 10), min_rmsd(0.5), num_saved_mins(50), mutation_amplitude(2) {}
 

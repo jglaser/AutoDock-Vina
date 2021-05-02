@@ -87,6 +87,8 @@ class _SwigNonDynamicMeta(type):
     __setattr__ = _swig_setattr_nondynamic_class_variable(type.__setattr__)
 
 
+import weakref
+
 
 if sys.platform.find("linux") != -1:
     sys.setdlopenflags(dlflags)
@@ -682,6 +684,28 @@ class ConstCharVector(object):
 # Register ConstCharVector in _vina_wrapper:
 _vina_wrapper.ConstCharVector_swigregister(ConstCharVector)
 
+class Callback(object):
+    thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
+    __repr__ = _swig_repr
+
+    def __init__(self):
+        if self.__class__ == Callback:
+            _self = None
+        else:
+            _self = self
+        _vina_wrapper.Callback_swiginit(self, _vina_wrapper.new_Callback(_self, ))
+    __swig_destroy__ = _vina_wrapper.delete_Callback
+
+    def call(self, v: "DoubleVector") -> "double":
+        return _vina_wrapper.Callback_call(self, v)
+    def __disown__(self):
+        self.this.disown()
+        _vina_wrapper.disown_Callback(self)
+        return weakref.proxy(self)
+
+# Register Callback in _vina_wrapper:
+_vina_wrapper.Callback_swigregister(Callback)
+
 class Vina(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
@@ -752,6 +776,31 @@ class Vina(object):
 
     def show_score(self, energies: "DoubleVector") -> "void":
         return _vina_wrapper.Vina_show_score(self, energies)
+
+    def set_callback(self, *args):
+        import numpy as np
+
+        if len(args) == 1 and (not isinstance(args[0], Callback) and callable(args[0])):
+            class CallableWrapper(Callback):
+                def __init__(self, f):
+                    super(CallableWrapper, self).__init__()
+                    self.f_ = f
+                def call(self, obj):
+                    coordinates = np.array(obj)
+                    coordinates = coordinates.reshape((coordinates.shape[0] // 3, 3))
+                    try:
+                        res = self.f_(coordinates)
+                        return float(res)
+                    except:
+                        return 0.0
+
+            args = tuple([CallableWrapper(args[0])])
+            args[0].__disown__()
+        elif len(args) == 1 and isinstance(args[0], Callback):
+          args[0].__disown__()
+        _vina_wrapper.Vina_set_callback(self, args[0])
+
+
 
 # Register Vina in _vina_wrapper:
 _vina_wrapper.Vina_swigregister(Vina)

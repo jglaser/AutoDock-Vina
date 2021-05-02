@@ -869,6 +869,11 @@ output_container Vina::remove_redundant(const output_container &in, fl min_rmsd)
 	return tmp;
 }
 
+void Vina::set_callback(Callback& callback)
+    {
+    m_callback = &callback;
+    }
+
 void Vina::global_search(const int exhaustiveness, const int n_poses, const double min_rmsd, const int max_evals) {
 	// Vina search (Monte-carlo and local optimization)
 	// Check if ff, box and ligand were initialized
@@ -897,7 +902,7 @@ void Vina::global_search(const int exhaustiveness, const int n_poses, const doub
 	rng generator(static_cast<rng::result_type>(m_seed));
 
 	// Setup Monte-Carlo search
-	parallel_mc parallelmc;
+	parallel_mc parallelmc(m_callback);
 	sz heuristic = m_model.num_movable_atoms() + 10 * m_model.get_size().num_degrees_of_freedom();
 	parallelmc.mc.global_steps = unsigned(70 * 3 * (50 + heuristic) / 2); // 2 * 70 -> 8 * 20 // FIXME
 	parallelmc.mc.local_steps = unsigned((25 + m_model.num_movable_atoms()) / 3);

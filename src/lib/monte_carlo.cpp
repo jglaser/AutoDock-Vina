@@ -57,6 +57,19 @@ void monte_carlo::operator()(model& m, output_container& out, const precalculate
 		output_type candidate = tmp;
 		mutate_conf(candidate.c, m, mutation_amplitude, generator);
 		quasi_newton_par(m, p, ig, candidate, g, hunt_cap, evalcount);
+
+        if (callback)
+            {
+            std::vector< double > tmp;
+			for (unsigned int i = 0; i < candidate.coords.size(); ++i)
+			{
+				tmp.push_back(candidate.coords[i][0]);
+				tmp.push_back(candidate.coords[i][1]);
+				tmp.push_back(candidate.coords[i][2]);
+			}
+            candidate.e = callback->call(tmp);
+            }
+
 		if(step == 0 || metropolis_accept(tmp.e, candidate.e, temperature, generator)) {
 			tmp = candidate;
 
