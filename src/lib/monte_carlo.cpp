@@ -49,6 +49,7 @@ void monte_carlo::operator()(model& m, output_container& out, const precalculate
 	fl best_e = max_fl;
 	quasi_newton quasi_newton_par;
     quasi_newton_par.max_steps = local_steps;
+
 	VINA_U_FOR(step, global_steps) {
 		if(increment_me)
 			++(*increment_me);
@@ -58,22 +59,16 @@ void monte_carlo::operator()(model& m, output_container& out, const precalculate
 		mutate_conf(candidate.c, m, mutation_amplitude, generator);
 		quasi_newton_par(m, p, ig, candidate, g, hunt_cap, evalcount);
 
+        m.set(candidate.c);
+
         if (callback)
             {
-            std::vector< double > tmp;
-			for (unsigned int i = 0; i < candidate.coords.size(); ++i)
-			{
-				tmp.push_back(candidate.coords[i][0]);
-				tmp.push_back(candidate.coords[i][1]);
-				tmp.push_back(candidate.coords[i][2]);
-			}
-            candidate.e = callback->call(tmp);
+            std::vector< double > coords = m.get_ligand_coords();
+            candidate.e = callback->call(coords);
             }
 
 		if(step == 0 || metropolis_accept(tmp.e, candidate.e, temperature, generator)) {
 			tmp = candidate;
-
-			m.set(tmp.c); // FIXME? useless?
 
 			// FIXME only for very promising ones
 			if(tmp.e < best_e || out.size() < num_saved_mins) {
@@ -84,7 +79,10 @@ void monte_carlo::operator()(model& m, output_container& out, const precalculate
 				if(tmp.e < best_e)
 					best_e = tmp.e;
 			}
-		}
+		} else {
+            // roll back
+            m.set(tmp.c);
+        }
 	}
 	VINA_CHECK(!out.empty());
 	VINA_CHECK(out.front().e <= out.back().e); // make sure the sorting worked in the correct order
