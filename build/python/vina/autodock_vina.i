@@ -134,5 +134,6 @@ namespace std {
         $action(self, args[0])
 %}
 
+%include "callback.h"
 %include "vina.i"
 
