@@ -974,6 +974,13 @@ void Vina::global_search(const int exhaustiveness, const int n_poses, const doub
 			std::vector<double> energies = score(intramolecular_energy);
 			// Store energy components in current pose
 			poses[i].e = energies[0]; // specific to each scoring function
+
+            if (m_callback)
+                {
+                std::vector< double > coords = m_model.get_ligand_coords();
+                poses[i].e = m_callback->call(coords);
+                }
+
 			poses[i].inter = energies[1] + energies[2];
 			poses[i].intra = energies[3] + energies[4] + energies[5];
 			poses[i].total = poses[i].inter + poses[i].intra; // cost function for optimization
