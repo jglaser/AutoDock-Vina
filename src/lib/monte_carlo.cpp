@@ -74,6 +74,11 @@ void monte_carlo::operator()(model& m, output_container& out, const precalculate
 			if(tmp.e < best_e || out.size() < num_saved_mins) {
 				quasi_newton_par(m, p, ig, tmp, g, authentic_v, evalcount);
 				m.set(tmp.c); // FIXME? useless?
+                if (callback)
+                    {
+                    std::vector< double > coords = m.get_ligand_coords();
+                    tmp.e = callback->call(coords);
+                    }
 				tmp.coords = m.get_heavy_atom_movable_coords();
 				add_to_output_container(out, tmp, min_rmsd, num_saved_mins); // 20 - max size
 				if(tmp.e < best_e)
